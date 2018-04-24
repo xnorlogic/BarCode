@@ -1,17 +1,16 @@
 #include "BarCode_Lib.h"
 
+/*BW_BarCode*/
 typedef struct{
-
-	unsigned char SupplierID;      /** 1   byte  **/
-	unsigned char HardwareID;			 /** 1   byte  **/
-	unsigned char Format;   /** 1   byte  **/
-	unsigned char SerialNumber[17];/** 17  bytes **/
-	unsigned char Data[53][2];		 /** 106 bytes **/
-	unsigned char Padding;				 /** 1   byte  **/
-	unsigned char CheckSum;			   /** 1   byte  **/
-	/** Total  -----------------       128 bytes **/
-
-} BarCode;
+	unsigned char  SupplierID;			/* Supplier ID 		1   Byte  */
+	unsigned char  HardwareID;			/* Hardware ID 		1   Byte  */
+	unsigned char  Format;				/* Format 			1   Byte  */
+	unsigned char  SerialNumber[17];	/* Serial Number 	17  Bytes */
+	unsigned short int Data[53];			/* Payload 			106 Bytes */
+	unsigned char  Padding;			/* Padding 			1   Byte  */
+	unsigned char  CheckSum;			/* Check Sum 		1   Byte  */
+							/* Total            128 Bytes */
+}BarCode;
 
 /* 128 bytes bar code */
 BarCode MY_APP_BarCode = {
