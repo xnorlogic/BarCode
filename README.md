@@ -4,13 +4,13 @@ This library checks if a particular bar code loaded in memory has good data or n
 Structure of the bar code in memory is as follows:
 
 	SupplierID;        	    /** 1   byte  **/
-	HardwareID;			    /** 1   byte  **/
+	HardwareID;	            /** 1   byte  **/
 	BarCodeFormat;		    /** 1   byte  **/
 	SerialNumber[17];	    /** 17  bytes **/
-	Data[53][2];			/** 106 bytes **/
-	Padding;				/** 1   byte  **/
-	CheckSum;			    /** 1   byte  **/
-    -----------------           128 bytes **/
+	Data[53][2];		    /** 106 bytes **/
+	Padding;		    /** 1   byte  **/
+	CheckSum;	            /** 1   byte  **/
+        ------------------------------- 128 bytes **/
 
 it totals 128 bytes or 256 ASCII Characters. It is intended that the bar code string will be parsed to memory in ASCII characters (example below):
 
