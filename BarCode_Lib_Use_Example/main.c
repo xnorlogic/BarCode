@@ -2,7 +2,7 @@
 #include "BarCode_Lib.h"
 
 /*BarCode_Test structure to simulate a bar code in memory*/
-typedef struct{
+typedef struct BarCode_Test{
 
 	unsigned char SupplierID;        	/** 1   byte  **/
 	unsigned char HardwareID;			/** 1   byte  **/
