@@ -4,7 +4,7 @@ typedef struct{
 
 	unsigned char SupplierID;      /** 1   byte  **/
 	unsigned char HardwareID;			 /** 1   byte  **/
-	unsigned char BarCodeFormat;   /** 1   byte  **/
+	unsigned char Format;   /** 1   byte  **/
 	unsigned char SerialNumber[17];/** 17  bytes **/
 	unsigned char Data[53][2];		 /** 106 bytes **/
 	unsigned char Padding;				 /** 1   byte  **/
@@ -33,7 +33,13 @@ BarCode MY_APP_BarCode = {
 	0,
 };
 
-bool barCode_intg_check(unsigned char *data){
+unsigned char CHECK_bool = 0;
+float USABE_ARRAY_A [25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+float USABE_ARRAY_B [25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+float USABE_ARRAY_C = 0;
+float USABE_ARRAY_D = 0;
+
+unsigned char barCode_intg_check(unsigned char *data){
 	/* Array index variable */
 	unsigned char Index  		       = 0U;
 	unsigned char ArrayDataSize    = 0U;
@@ -50,8 +56,8 @@ bool barCode_intg_check(unsigned char *data){
 	unsigned char CheckSUM_calc    = 0U;
 
 	/* Integrity check bools */
-	bool CheckSum_OK    = 0;
-	bool DataCheck_OK   = 0;
+	unsigned char CheckSum_OK    = 0;
+	unsigned char DataCheck_OK   = 0;
 
 	/*******************************************
 	** Description  : Supplier ID
@@ -166,7 +172,7 @@ bool barCode_intg_check(unsigned char *data){
 	}
 }
 
-bool barCode_loadNready(unsigned char *data){
+unsigned char barCode_loadNready(unsigned char *data){
 	/*******************************************
 	unsigned char Local Variables
 	*******************************************/
@@ -251,7 +257,7 @@ bool barCode_loadNready(unsigned char *data){
 	/** Offset = 51 **/
 	Index = 0U;
 	/* extract data from the bar code data */
-	buffer = MY_APP_BarCode.Data[Index + Kisspoint_Data_Offset];
+	buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
 	/* scale data according to Bar Code Spec */
 	buffer /= Data_Scale_Factor;
 	/* Assign input with Characterized data */
@@ -261,7 +267,7 @@ bool barCode_loadNready(unsigned char *data){
 	/** Offset = 52 **/
 	Index = 0U;
 	/* extract data from the bar code data */
-	buffer = MY_APP_BarCode.Data[Index + KisspointOffsetAngle_Data_Offset];
+	buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
 	/* scale data according to Bar Code Spec */
 	buffer /= Data_Scale_Factor;
 	/* Assign input with Characterized data */
@@ -275,7 +281,7 @@ bool barCode_loadNready(unsigned char *data){
 	buffer = 0.0f;
 	for(Index = 0U ; Index < ArrayDataSize ; Index++){
 	    /* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + Troque_Data_Offset];
+		buffer = MY_APP_BarCode.Data[Index + A_Data_Offset];
 		/* scale data according to Bar Code Spec */
 		buffer /= Data_Scale_Factor;
 		/* Check the assigned element */
@@ -293,7 +299,7 @@ bool barCode_loadNready(unsigned char *data){
 	buffer = 0.0f;
 	for(Index = 0U ; Index < ArrayDataSize ; Index++){
         /* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + Position_Data_Offset];
+		buffer = MY_APP_BarCode.Data[Index + B_Data_Offset];
 		/* scale data according to Bar Code Spec */
 		buffer /= Data_Scale_Factor;
 		/* Check the assigned element */
@@ -310,7 +316,7 @@ bool barCode_loadNready(unsigned char *data){
 	buffer = 0.0f;
 	Index = 0U;
 	/* extract data from the bar code data */
-	buffer = MY_APP_BarCode.Data[Index + Kisspoint_Data_Offset];
+	buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
 	/* scale data according to Bar Code Spec */
 	buffer /= Data_Scale_Factor;
 	/* Check the assigned element */
@@ -326,7 +332,7 @@ bool barCode_loadNready(unsigned char *data){
 	buffer = 0.0f;
 	Index = 0U;
 	/* extract data from the bar code data */
-	buffer = MY_APP_BarCode.Data[Index + KisspointOffsetAngle_Data_Offset];
+	buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
 	/* scale data according to Bar Code Spec */
 	buffer /= Data_Scale_Factor;
 	/* Check the assigned element */
