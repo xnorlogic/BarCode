@@ -1,26 +1,27 @@
 #include <stdio.h>
 #include "BarCode_Lib.h"
 
-/*BarCode_Test*/
+/*BarCode_Test structure to simulate a bar code in memory*/
 typedef struct{
 
 	unsigned char SupplierID;        	/** 1   byte  **/
 	unsigned char HardwareID;			/** 1   byte  **/
 	unsigned char BarCodeFormat;		/** 1   byte  **/
-	unsigned char SerialNumber[17];	/** 17  bytes **/
+	unsigned char SerialNumber[17];	    /** 17  bytes **/
 	unsigned char Data[53][2];			/** 106 bytes **/
 	unsigned char Padding;				/** 1   byte  **/
-	unsigned char CheckSum;			/** 1   byte  **/
-	/** Total  -----------------128 bytes **/
+	unsigned char CheckSum;			    /** 1   byte  **/
+	/** Total  -----------------            128 bytes **/
 
 } BarCode_Test;
 
+/*This will load a test bar code into the memory*/
 BarCode_Test MY_Barcode = {
 
-	/* Barcode Raw Data initialization */
+	/* Bar code Raw Data initialization */
 	0x32, /*  Supplier ID   */
 	0x31, /* Hardware ID   */
-	0x31, /*  Barcode Format   */
+	0x31, /*  Bar code Format   */
 	{
 	/* [0..8] */ 0x41,0x41,0x41,0x41,0x58,0x30,0x30,0x30,0x30,
 	/* [9..16] */ 0x30,0x30,0x30,0x30,0x30,0x58,0x30,0x31
@@ -195,16 +196,57 @@ unsigned char * DataPointer;
 
 int main(){
 
+	/*flags for the integrity check returns*/
 	unsigned char integrityCheck = 0;
 	unsigned char confrmCheck = 0;
 
+	/*Index for fetching the data in the bar code*/
+	unsigned char Index = 0;
+
+	/*Array size of the data in the bar code*/
+	unsigned char ArrayData_Size = 25;
+
+	/*Pointer to the bar code in the memory*/
 	DataPointer = &MY_Barcode;
 
+	/*Call to the integrity check function*/
 	integrityCheck = barCode_intg_check(DataPointer);
-	confrmCheck = barCode_loadNready(DataPointer);
 
+	/*Quick check if the integrity of the data is ok*/
+	if(integrityCheck == 1){
+	    /*Load the data only if the integrity data check is true*/
+		confrmCheck = barCode_loadNready(DataPointer);
+	}
+	else{
+		printf("Bar Code Integrity Failed!... No data will be loaded\n");
+	}
+
+	/*Integrity check flags print out*/
 	printf("integrity Check           : %d\n", integrityCheck);
-	printf("confirmation update Check : %d"  , confrmCheck);
+	printf("confirmation update Check : %d\n"  , confrmCheck);
+
+	/*Usable data print out... Data A*/
+	printf("Usable Data A: ");
+	for(Index = 0 ; Index <ArrayData_Size ; Index++){
+		printf(" %f "  , USABE_ARRAY_A[Index]);
+	}
+	printf("\n");
+
+	/*Usable data print out... Data B*/
+	printf("Usable Data B: ");
+	for(Index = 0 ; Index <ArrayData_Size ; Index++){
+		printf(" %f "  , USABE_ARRAY_B[Index]);
+	}
+	printf("\n");
+
+	/*Usable data print out... Data C*/
+	printf("Usable data C: %f\n" , USABE_ARRAY_C);
+
+	/*Usable data print out... Data D*/
+	printf("Usable data D: %f\n"   , USABE_ARRAY_D);
+
+	/*Check flag to be used by the application in order to use default data or bar code data*/
+	printf("Using Bar Code data: %d"   , CHECK_bool);
 
 	return 0;
 }
