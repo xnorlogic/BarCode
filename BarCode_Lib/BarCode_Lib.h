@@ -13,6 +13,9 @@
  };
 
  */
+
+#define NULL      0
+
 unsigned char CHECK_bool;
 float USABE_ARRAY_A[25];
 float USABE_ARRAY_B[25];
