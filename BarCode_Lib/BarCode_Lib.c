@@ -185,9 +185,9 @@ unsigned char barCode_intg_check(unsigned char *data) {
 
 		unsigned char USABE_ARRAY_A_MonotonicallyInc = 0U;
 		unsigned char USABE_ARRAY_B_MonotonicallyInc = 0U;
-		unsigned char USABE_ARRAY_A_InRage = 0U;
+		unsigned char USABE_ARRAY_A_InRange = 0U;
 		unsigned char USABE_ARRAY_B_InRange = 0U;
-		unsigned char USABE_ARRAY_C_InRage = 0U;
+		unsigned char USABE_ARRAY_C_InRange = 0U;
 		unsigned char USABE_ARRAY_D_InRange = 0U;
 
 		float Max_USABE_ARRAY_A = MY_APP_BarCode.Data[24U] / Data_Scale_Factor;
@@ -260,9 +260,9 @@ unsigned char barCode_intg_check(unsigned char *data) {
 		/*Maximum torque in bounds check*/
 		if ((LowerBound_USABE_ARRAY_A_Cal < Max_USABE_ARRAY_A)
 				&& (Max_USABE_ARRAY_A < UpperBound_USABE_ARRAY_A_Cal) && (Min_USABE_ARRAY_A == 0U)) {
-			USABE_ARRAY_A_InRage = 1U;
+			USABE_ARRAY_A_InRange = 1U;
 		} else {
-			USABE_ARRAY_A_InRage = 0U;
+			USABE_ARRAY_A_InRange = 0U;
 		}
 
 		/*Maximum angle position in range check*/
@@ -275,9 +275,9 @@ unsigned char barCode_intg_check(unsigned char *data) {
 
 		/*Kisspoint in bounds check*/
 		if ((LowerBound_USABE_ARRAY_C_Cal < USABE_ARRAY_C_value) && (USABE_ARRAY_C_value < UpperBound_USABE_ARRAY_C_Cal)) {
-			USABE_ARRAY_C_InRage = 1U;
+			USABE_ARRAY_C_InRange = 1U;
 		} else {
-			USABE_ARRAY_C_InRage = 0U;
+			USABE_ARRAY_C_InRange = 0U;
 		}
 
 		/*Kisspoint offset angle in bounds check*/
@@ -290,8 +290,8 @@ unsigned char barCode_intg_check(unsigned char *data) {
 
 		/* Data integrity check pass */
 		if ((USABE_ARRAY_A_MonotonicallyInc == 1U) && (USABE_ARRAY_B_MonotonicallyInc == 1U)
-				&& (USABE_ARRAY_A_InRage == 1U) && (USABE_ARRAY_B_InRange == 1U)
-				&& (USABE_ARRAY_C_InRage == 1U) && (USABE_ARRAY_D_InRange == 1U)) {
+				&& (USABE_ARRAY_A_InRange == 1U) && (USABE_ARRAY_B_InRange == 1U)
+				&& (USABE_ARRAY_C_InRange == 1U) && (USABE_ARRAY_D_InRange == 1U)) {
 			DataCheck_OK = 1U;
 		} else {
 			DataCheck_OK = 0U;
@@ -309,6 +309,8 @@ unsigned char barCode_intg_check(unsigned char *data) {
 unsigned char barCode_loadNready(unsigned char *data) {
 	/* Null pointer check bool */
 	unsigned char Null_Data_Pointer = 0U;
+	/* Data integrity check flag */
+	unsigned char Data_Integrity_Check = 0U;
 	/* Data check counter */
 	unsigned char DataCheck = 0U;
 	/* Data check counter */
@@ -316,173 +318,182 @@ unsigned char barCode_loadNready(unsigned char *data) {
 	/* Bar code Characterized total data size */
 	unsigned char BarCode_D_arraySize = 52U;
 
+	/* call to the integrity function and asign the value to the flag */
+	Data_Integrity_Check = barCode_intg_check(data);
+
 	/* NULL pointer prevention */
 	if (data != NULL) {
+		/* Set the NULL data pointer */
 		Null_Data_Pointer = 1U;
-		/*******************************************
-		 unsigned char Local Variables
-		 *******************************************/
-		/* Array index variable */
-		unsigned char Index = 0U;
-		unsigned char ArrayDataSize = 0U;
-		/* Byte offset variables */
-		unsigned char OffSet = 0U;
-		unsigned char ByteOffset = 0U;
-		/* 2 byte variable construct */
-		unsigned char LowByte = 0U;
-		unsigned char HighByte = 0U;
-		/* Supplier Data Array offsets */
-		unsigned char A_Data_Offset = 0U; /* first 25 elements of the array */
-		unsigned char B_Data_Offset = 25U; /* next 25 elements of the array */
-		unsigned char C_Data_Offset = 50U; /* next element of the array */
-		unsigned char D_Data_Offset = 51U; /* next element of the array */
-		/* Characterized Data Array size */
-		unsigned char Characterized_D_arraySize = 25U;
+		/* data integrity check prior to saving bar code to the algorithm */
+		if(Data_Integrity_Check == 1U){
+			/*******************************************
+			 unsigned char Local Variables
+			 *******************************************/
+			/* Array index variable */
+			unsigned char Index = 0U;
+			unsigned char ArrayDataSize = 0U;
+			/* Byte offset variables */
+			unsigned char OffSet = 0U;
+			unsigned char ByteOffset = 0U;
+			/* 2 byte variable construct */
+			unsigned char LowByte = 0U;
+			unsigned char HighByte = 0U;
+			/* Supplier Data Array offsets */
+			unsigned char A_Data_Offset = 0U; /* first 25 elements of the array */
+			unsigned char B_Data_Offset = 25U; /* next 25 elements of the array */
+			unsigned char C_Data_Offset = 50U; /* next element of the array */
+			unsigned char D_Data_Offset = 51U; /* next element of the array */
+			/* Characterized Data Array size */
+			unsigned char Characterized_D_arraySize = 25U;
 
-		/*******************************************
-		 float Local Variables
-		 *******************************************/
-		/* Data buffer variable */
-		float buffer = 0.0f;
-		/* Data Scale Factor */
-		float Data_Scale_Factor = 10.0f;
+			/*******************************************
+			 float Local Variables
+			 *******************************************/
+			/* Data buffer variable */
+			float buffer = 0.0f;
+			/* Data Scale Factor */
+			float Data_Scale_Factor = 10.0f;
 
-		/*******************************************
-		 ** Description  : Supplier Data
-		 ** Bytes        : 2 per data value
-		 (106 bytes total)
-		 ** Offset start : 20
-		 ** Data size    : 53
-		 *******************************************/
-		OffSet = 20U;
-		ByteOffset = 2U;
-		ArrayDataSize = 53U;
-		for (Index = 0U; Index < ArrayDataSize; Index++) {
-			/* Extract Low and high byte */
-			HighByte = *(data + OffSet);
-			LowByte = *(data + OffSet + 1U);
-			/* Assemble the array element */
-			MY_APP_BarCode.Data[Index] = (unsigned short int) ((HighByte << 8U)
-					| LowByte);
-			/* two byte offset */
-			OffSet = OffSet + ByteOffset;
-		}
+			/*******************************************
+			 ** Description  : Supplier Data
+			 ** Bytes        : 2 per data value
+			 (106 bytes total)
+			 ** Offset start : 20
+			 ** Data size    : 53
+			 *******************************************/
+			OffSet = 20U;
+			ByteOffset = 2U;
+			ArrayDataSize = 53U;
+			for (Index = 0U; Index < ArrayDataSize; Index++) {
+				/* Extract Low and high byte */
+				HighByte = *(data + OffSet);
+				LowByte = *(data + OffSet + 1U);
+				/* Assemble the array element */
+				MY_APP_BarCode.Data[Index] = (unsigned short int) ((HighByte << 8U)
+						| LowByte);
+				/* two byte offset */
+				OffSet = OffSet + ByteOffset;
+			}
 
-		/***************************************************************
-		 DataSave Section
-		 ***************************************************************/
-		/** Save the Bar Code data into USABE_ARRAY_A (array size is 25) **/
-		/** Offset = 0 **/
-		ArrayDataSize = Characterized_D_arraySize;
-		buffer = 0.0f;
-		for (Index = 0U; Index < ArrayDataSize; Index++) {
+			/***************************************************************
+			 DataSave Section
+			 ***************************************************************/
+			/** Save the Bar Code data into USABE_ARRAY_A (array size is 25) **/
+			/** Offset = 0 **/
+			ArrayDataSize = Characterized_D_arraySize;
+			buffer = 0.0f;
+			for (Index = 0U; Index < ArrayDataSize; Index++) {
+				/* extract data from the bar code data */
+				buffer = MY_APP_BarCode.Data[Index + A_Data_Offset];
+				/* scale data according to Bar Code Spec */
+				buffer /= Data_Scale_Factor;
+				/* Assign input with Characterized data */
+				USABE_ARRAY_A[Index] = buffer;
+			}
+
+			/** Save the Bar Code data into USABE_ARRAY_B (array size is 25) **/
+			/** Offset = 26 **/
+			ArrayDataSize = Characterized_D_arraySize;
+			buffer = 0U;
+			for (Index = 0U; Index < ArrayDataSize; Index++) {
+				/* extract data from the bar code data */
+				buffer = MY_APP_BarCode.Data[Index + B_Data_Offset];
+				/* scale data according to Bar Code Spec */
+				buffer /= Data_Scale_Factor;
+				/* Assign input with Characterized data */
+				USABE_ARRAY_B[Index] = buffer;
+			}
+
+			/** Save the barcode data into USABE_ARRAY_C (array size is 1) **/
+			/** Offset = 51 **/
+			Index = 0U;
 			/* extract data from the bar code data */
-			buffer = MY_APP_BarCode.Data[Index + A_Data_Offset];
+			buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
 			/* scale data according to Bar Code Spec */
 			buffer /= Data_Scale_Factor;
 			/* Assign input with Characterized data */
-			USABE_ARRAY_A[Index] = buffer;
-		}
-		/** Save the Bar Code data into USABE_ARRAY_B (array size is 25) **/
-		/** Offset = 26 **/
-		ArrayDataSize = Characterized_D_arraySize;
-		buffer = 0U;
-		for (Index = 0U; Index < ArrayDataSize; Index++) {
+			USABE_ARRAY_C = buffer;
+
+			/** Save the barcode data into USABE_ARRAY_D (array size is 1) **/
+			/** Offset = 52 **/
+			Index = 0U;
 			/* extract data from the bar code data */
-			buffer = MY_APP_BarCode.Data[Index + B_Data_Offset];
+			buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
 			/* scale data according to Bar Code Spec */
 			buffer /= Data_Scale_Factor;
 			/* Assign input with Characterized data */
-			USABE_ARRAY_B[Index] = buffer;
-		}
+			USABE_ARRAY_D = buffer;
 
-		/** Save the barcode data into USABE_ARRAY_C (array size is 1) **/
-		/** Offset = 51 **/
-		Index = 0U;
-		/* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
-		/* scale data according to Bar Code Spec */
-		buffer /= Data_Scale_Factor;
-		/* Assign input with Characterized data */
-		USABE_ARRAY_C = buffer;
+			/***************************************************************
+			 DataCheck Section
+			 ***************************************************************/
+			/** Double check Characterized torque in the extracted array **/
+			ArrayDataSize = Characterized_D_arraySize;
+			buffer = 0.0f;
+			for (Index = 0U; Index < ArrayDataSize; Index++) {
+				/* extract data from the bar code data */
+				buffer = MY_APP_BarCode.Data[Index + A_Data_Offset];
+				/* scale data according to Bar Code Spec */
+				buffer /= Data_Scale_Factor;
+				/* Check the assigned element */
+				if (USABE_ARRAY_A[Index] == buffer) {
+					/* Increase the data check accumulator */
+					DataCheck = DataCheck + 1U;
+				} else {
+					DataCheck = DataCheck + 0U;
+				}
+			}
 
-		/** Save the barcode data into USABE_ARRAY_D (array size is 1) **/
-		/** Offset = 52 **/
-		Index = 0U;
-		/* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
-		/* scale data according to Bar Code Spec */
-		buffer /= Data_Scale_Factor;
-		/* Assign input with Characterized data */
-		USABE_ARRAY_D = buffer;
+			/** Double check Characterized position in the extracted array **/
+			ArrayDataSize = Characterized_D_arraySize;
+			buffer = 0.0f;
+			for (Index = 0U; Index < ArrayDataSize; Index++) {
+				/* extract data from the bar code data */
+				buffer = MY_APP_BarCode.Data[Index + B_Data_Offset];
+				/* scale data according to Bar Code Spec */
+				buffer /= Data_Scale_Factor;
+				/* Check the assigned element */
+				if (USABE_ARRAY_B[Index] == buffer) {
+					/* Increase the data check accumulator */
+					DataCheck = DataCheck + 1U;
+				} else {
+					DataCheck = DataCheck + 0U;
+				}
+			}
 
-		/***************************************************************
-		 DataCheck Section
-		 ***************************************************************/
-		/** Double check Characterized torque in the extracted array **/
-		ArrayDataSize = Characterized_D_arraySize;
-		buffer = 0.0f;
-		for (Index = 0U; Index < ArrayDataSize; Index++) {
+			/** Double check Characterized Kisspoint in the extracted variable **/
+			buffer = 0.0f;
+			Index = 0U;
 			/* extract data from the bar code data */
-			buffer = MY_APP_BarCode.Data[Index + A_Data_Offset];
+			buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
 			/* scale data according to Bar Code Spec */
 			buffer /= Data_Scale_Factor;
 			/* Check the assigned element */
-			if (USABE_ARRAY_A[Index] == buffer) {
+			if (USABE_ARRAY_C == buffer) {
 				/* Increase the data check accumulator */
 				DataCheck = DataCheck + 1U;
 			} else {
 				DataCheck = DataCheck + 0U;
 			}
-		}
 
-		/** Double check Characterized position in the extracted array **/
-		ArrayDataSize = Characterized_D_arraySize;
-		buffer = 0.0f;
-		for (Index = 0U; Index < ArrayDataSize; Index++) {
+			/** Double check Characterized Kisspoint offset angle in the extracted variable **/
+			buffer = 0.0f;
+			Index = 0U;
 			/* extract data from the bar code data */
-			buffer = MY_APP_BarCode.Data[Index + B_Data_Offset];
+			buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
 			/* scale data according to Bar Code Spec */
 			buffer /= Data_Scale_Factor;
 			/* Check the assigned element */
-			if (USABE_ARRAY_B[Index] == buffer) {
+			if (USABE_ARRAY_D == buffer) {
 				/* Increase the data check accumulator */
 				DataCheck = DataCheck + 1U;
 			} else {
 				DataCheck = DataCheck + 0U;
 			}
+		}else{
+			/* do nothing */
 		}
-
-		/** Double check Characterized Kisspoint in the extracted variable **/
-		buffer = 0.0f;
-		Index = 0U;
-		/* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + C_Data_Offset];
-		/* scale data according to Bar Code Spec */
-		buffer /= Data_Scale_Factor;
-		/* Check the assigned element */
-		if (USABE_ARRAY_C == buffer) {
-			/* Increase the data check accumulator */
-			DataCheck = DataCheck + 1U;
-		} else {
-			DataCheck = DataCheck + 0U;
-		}
-
-		/** Double check Characterized Kisspoint offset angle in the extracted variable **/
-		buffer = 0.0f;
-		Index = 0U;
-		/* extract data from the bar code data */
-		buffer = MY_APP_BarCode.Data[Index + D_Data_Offset];
-		/* scale data according to Bar Code Spec */
-		buffer /= Data_Scale_Factor;
-		/* Check the assigned element */
-		if (USABE_ARRAY_D == buffer) {
-			/* Increase the data check accumulator */
-			DataCheck = DataCheck + 1U;
-		} else {
-			DataCheck = DataCheck + 0U;
-		}
-
 		/** Final Data check **/
 		/* Check if all data loaded correctly */
 		if (DataCheck == BarCode_D_arraySize) {
@@ -499,7 +510,12 @@ unsigned char barCode_loadNready(unsigned char *data) {
 	}
 
 	/* Return statement for the bar code loaded */
-	return (Data_Loaded & 1U) & (Null_Data_Pointer & 1U);
+	/* Data loaded correctly in the algorithm = TRUE */
+	/* NULL data pointer = TRUE */
+	/* Data integrity check = TRUE */
+	return (Data_Loaded & 1U) &
+		   (Null_Data_Pointer & 1U) &
+		   (Data_Integrity_Check & 1U);
 }
 
 unsigned char CheckSum_Calculator(unsigned char BarCodeData_Size,
@@ -523,5 +539,4 @@ unsigned char CheckSum_Calculator(unsigned char BarCodeData_Size,
 
 	/* Return statement for the checksum calculator */
 	return CheckSUM_calc;
-
 }
